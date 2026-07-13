@@ -10,7 +10,7 @@ original_rpm=$1
 font_dir=$2
 output_dir=$3
 version=24.2.5.2
-release=3
+release=4
 package_name=libreoffice-headless
 font_target='opt/libreoffice-headless/lib/libreoffice/share/fonts/truetype'
 runtime_root='opt/libreoffice-headless'
@@ -95,7 +95,7 @@ cp -a %{_sourcedir}/payload/. %{buildroot}/
 
 %changelog
 * Mon Jul 13 2026 caork - ${version}-${release}
-- Bundle Noto CJK fallback fonts and a self-contained headless launcher.
+- Bundle Noto CJK fallback fonts and a restart-aware headless launcher.
 SPEC
 
 rpmbuild --define "_topdir $top_dir" --target aarch64 -bb "$top_dir/SPECS/${package_name}.spec"

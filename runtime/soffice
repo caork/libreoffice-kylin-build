@@ -9,4 +9,8 @@ export FONTCONFIG_PATH=$lo_root/etc/fonts
 export URE_BOOTSTRAP=vnd.sun.star.pathname:$program_dir/fundamentalrc
 export SAL_USE_VCLPLUGIN=${SAL_USE_VCLPLUGIN:-svp}
 
-exec "$program_dir/soffice.bin" "$@"
+while :; do
+  "$program_dir/soffice.bin" "$@" && exit 0
+  status=$?
+  [ "$status" -eq 81 ] || exit "$status"
+done
