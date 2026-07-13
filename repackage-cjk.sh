@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -ne 4 ]; then
-  echo "usage: $0 <original.tar.gz> <original.rpm> <font-dir> <output-dir>" >&2
+if [ "$#" -ne 3 ]; then
+  echo "usage: $0 <original.rpm> <font-dir> <output-dir>" >&2
   exit 2
 fi
 
-original_tar=$1
-original_rpm=$2
-font_dir=$3
-output_dir=$4
+original_rpm=$1
+font_dir=$2
+output_dir=$3
 version=24.2.5.2
 release=2
 package_name=libreoffice-headless
@@ -21,19 +20,17 @@ font_files=(
   NotoSerifCJKsc-Bold.otf
 )
 
-for input in "$original_tar" "$original_rpm" "$font_dir/Noto-CJK-LICENSE" \
+for input in "$original_rpm" "$font_dir/Noto-CJK-LICENSE" \
   "${font_files[@]/#/$font_dir/}"; do
   [ -f "$input" ] || { echo "required input is missing: $input" >&2; exit 1; }
 done
 
 work_dir=$(mktemp -d)
 trap 'rm -rf "$work_dir"' EXIT
-tar_root="$work_dir/tar-root"
 rpm_root="$work_dir/rpm-root"
 top_dir="$work_dir/rpmbuild"
-mkdir -p "$tar_root" "$rpm_root" "$top_dir"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS} "$output_dir"
+mkdir -p "$rpm_root" "$top_dir"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS} "$output_dir"
 
-tar xzf "$original_tar" -C "$tar_root"
 (cd "$rpm_root" && rpm2cpio "$original_rpm" | cpio -idm --quiet)
 
 inject_fonts() {
@@ -54,11 +51,7 @@ inject_fonts() {
   mv "$replacement" "$config"
 }
 
-inject_fonts "$tar_root"
 inject_fonts "$rpm_root"
-
-tar_output="$output_dir/libreoffice-${version}-headless-aarch64-cjk.tar.gz"
-tar -C "$tar_root" -czf "$tar_output" opt
 
 find "$rpm_root" -mindepth 1 -printf '/%P\n' | sort > "$top_dir/SOURCES/files.list"
 cp -a "$rpm_root/." "$top_dir/SOURCES/payload"
@@ -96,5 +89,5 @@ rpm_output=$(find "$top_dir/RPMS" -type f -name "${package_name}-${version}-${re
 [ -n "$rpm_output" ] || { echo 'RPM build did not produce the expected artifact' >&2; exit 1; }
 cp "$rpm_output" "$output_dir/${package_name}-${version}-${release}.aarch64.rpm"
 
-sha256sum "$tar_output" "$output_dir/${package_name}-${version}-${release}.aarch64.rpm" \
+(cd "$output_dir" && sha256sum "${package_name}-${version}-${release}.aarch64.rpm") \
   > "$output_dir/SHA256SUMS"
