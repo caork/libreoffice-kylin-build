@@ -1,0 +1,35 @@
+# Repackage the existing ARM64 LibreOffice release with bundled CJK fallback fonts.
+# The packaging steps are architecture-neutral; the output remains ARM64 because
+# it contains the original ARM64 LibreOffice binaries.
+FROM debian:bookworm-slim AS fonts
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      fonts-noto-cjk && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM fedora:42 AS packager
+
+RUN dnf install -y cpio rpm-build rpm-sign tar gzip && \
+    dnf clean all
+
+COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc /fonts/
+COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc /fonts/
+COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc /fonts/
+COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc /fonts/
+COPY --from=fonts /usr/share/doc/fonts-noto-cjk/copyright /fonts/Noto-CJK-LICENSE
+
+COPY repackage-cjk.sh cjk-font-aliases.xml /usr/local/share/libreoffice-cjk/
+COPY libreoffice-24.2.5.2-headless-aarch64.tar.gz /input/
+COPY libreoffice-headless-24.2.5.2-1.aarch64.rpm /input/
+
+RUN chmod +x /usr/local/share/libreoffice-cjk/repackage-cjk.sh && \
+    /usr/local/share/libreoffice-cjk/repackage-cjk.sh \
+      /input/libreoffice-24.2.5.2-headless-aarch64.tar.gz \
+      /input/libreoffice-headless-24.2.5.2-1.aarch64.rpm \
+      /fonts \
+      /out
+
+FROM scratch AS artifacts
+
+COPY --from=packager /out/ /

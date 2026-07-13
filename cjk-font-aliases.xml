@@ -1,0 +1,41 @@
+  <!-- CJK fallbacks for documents created with common Windows and Apple fonts. -->
+  <alias binding="strong">
+    <family>Microsoft YaHei</family>
+    <default><family>Noto Sans CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>SimHei</family>
+    <default><family>Noto Sans CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>DengXian</family>
+    <default><family>Noto Sans CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>PingFang SC</family>
+    <default><family>Noto Sans CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>SimSun</family>
+    <default><family>Noto Serif CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>NSimSun</family>
+    <default><family>Noto Serif CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>FangSong</family>
+    <default><family>Noto Serif CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>KaiTi</family>
+    <default><family>Noto Serif CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>STSong</family>
+    <default><family>Noto Serif CJK SC</family></default>
+  </alias>
+  <alias binding="strong">
+    <family>STHeiti</family>
+    <default><family>Noto Sans CJK SC</family></default>
+  </alias>
