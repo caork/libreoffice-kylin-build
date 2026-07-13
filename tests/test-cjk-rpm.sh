@@ -6,10 +6,11 @@ work_dir=${2:-/tmp/libreoffice-cjk-rpm-test}
 packager_image=${3:-libreoffice-cjk-packager:latest}
 rpm_dir=$(cd "$(dirname "$rpm_path")" && pwd)
 rpm_file=$(basename "$rpm_path")
+fixture_dir=$(cd "$(dirname "$0")/fixtures" && pwd)
 
 rm -rf "$work_dir"
 mkdir -p "$work_dir/root" "$work_dir/docx" "$work_dir/pptx"
-sh "$(dirname "$0")/create-cjk-fixtures.sh" "$work_dir"
+cp "$fixture_dir/chinese-font-test.docx" "$fixture_dir/chinese-font-test.pptx" "$work_dir/"
 
 docker run --rm \
   -e RPM_FILE="$rpm_file" \
