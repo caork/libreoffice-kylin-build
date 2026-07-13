@@ -8,10 +8,12 @@ RUN apt-get update && \
       fonts-noto-cjk && \
     rm -rf /var/lib/apt/lists/*
 
-FROM fedora:42 AS packager
+FROM debian:bookworm-slim AS packager
 
-RUN dnf install -y cpio rpm-build rpm-sign tar gzip && \
-    dnf clean all
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      cpio rpm tar gzip && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc /fonts/
 COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc /fonts/
