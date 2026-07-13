@@ -9,7 +9,7 @@ rpm_file=$(basename "$rpm_path")
 
 rm -rf "$work_dir"
 mkdir -p "$work_dir/root" "$work_dir/docx" "$work_dir/pptx"
-"$(dirname "$0")/create-cjk-fixtures.sh" "$work_dir"
+sh "$(dirname "$0")/create-cjk-fixtures.sh" "$work_dir"
 
 docker run --rm \
   -e RPM_FILE="$rpm_file" \
