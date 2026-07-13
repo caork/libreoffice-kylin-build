@@ -3,7 +3,8 @@
 # it contains the original ARM64 LibreOffice binaries.
 FROM debian:bookworm-slim AS fonts
 
-RUN apt-get update && \
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
@@ -26,7 +27,8 @@ RUN install -d /fonts && \
 
 FROM debian:bookworm-slim AS packager
 
-RUN apt-get update && \
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       cpio rpm tar gzip && \
     rm -rf /var/lib/apt/lists/*
