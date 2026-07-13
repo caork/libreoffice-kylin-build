@@ -14,11 +14,15 @@ version=24.2.5.2
 release=2
 package_name=libreoffice-headless
 font_target='opt/libreoffice-headless/lib/libreoffice/share/fonts/truetype'
+font_files=(
+  NotoSansCJKsc-Regular.otf
+  NotoSansCJKsc-Bold.otf
+  NotoSerifCJKsc-Regular.otf
+  NotoSerifCJKsc-Bold.otf
+)
 
-for input in "$original_tar" "$original_rpm" \
-  "$font_dir/NotoSansCJK-Regular.ttc" "$font_dir/NotoSansCJK-Bold.ttc" \
-  "$font_dir/NotoSerifCJK-Regular.ttc" "$font_dir/NotoSerifCJK-Bold.ttc" \
-  "$font_dir/Noto-CJK-LICENSE"; do
+for input in "$original_tar" "$original_rpm" "$font_dir/Noto-CJK-LICENSE" \
+  "${font_files[@]/#/$font_dir/}"; do
   [ -f "$input" ] || { echo "required input is missing: $input" >&2; exit 1; }
 done
 
@@ -40,7 +44,9 @@ inject_fonts() {
 
   [ -f "$config" ] || { echo "LibreOffice fontconfig file missing: $config" >&2; exit 1; }
   install -d "$target"
-  install -m 0644 "$font_dir"/Noto*CJK-*.ttc "$target/"
+  for font_file in "${font_files[@]}"; do
+    install -m 0644 "$font_dir/$font_file" "$target/"
+  done
   install -m 0644 "$font_dir/Noto-CJK-LICENSE" "$target/"
   head -n -1 "$config" > "$replacement"
   cat /usr/local/share/libreoffice-cjk/cjk-font-aliases.xml >> "$replacement"
