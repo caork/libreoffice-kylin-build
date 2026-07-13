@@ -8,7 +8,9 @@ rpm_dir=$(cd "$(dirname "$rpm_path")" && pwd)
 rpm_file=$(basename "$rpm_path")
 fixture_dir=$(cd "$(dirname "$0")/fixtures" && pwd)
 
-rm -rf "$work_dir"
+mkdir -p "$work_dir"
+docker run --rm -v "$work_dir:/work" "$packager_image" \
+  sh -ec 'rm -rf /work/* /work/.[!.]* /work/..?* 2>/dev/null || true'
 mkdir -p "$work_dir/root" "$work_dir/docx" "$work_dir/pptx"
 cp "$fixture_dir/chinese-font-test.docx" "$fixture_dir/chinese-font-test.pptx" "$work_dir/"
 
@@ -24,6 +26,7 @@ docker run --rm \
     test -x opt/libreoffice-headless/bin/soffice
     test -f opt/libreoffice-headless/etc/fonts/fonts.conf
     test "$(find opt/libreoffice-headless/lib/libreoffice/share/fonts/truetype -name "Noto*CJKsc-*.otf" | wc -l)" -eq 4
+    chmod -R a+rwX /work
   '
 
 docker run --rm --platform linux/arm64 \
