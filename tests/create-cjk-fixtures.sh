@@ -4,7 +4,9 @@ set -eu
 output_dir=${1:?usage: $0 <output-dir>}
 work_dir=$(mktemp -d)
 trap 'rm -rf "$work_dir"' EXIT
-mkdir -p "$output_dir" "$work_dir/docx/_rels" "$work_dir/docx/word" \
+mkdir -p "$output_dir"
+output_dir=$(cd "$output_dir" && pwd)
+mkdir -p "$work_dir/docx/_rels" "$work_dir/docx/word" \
   "$work_dir/pptx/_rels" "$work_dir/pptx/ppt/_rels" "$work_dir/pptx/ppt/slides"
 
 cat > "$work_dir/docx/[Content_Types].xml" <<'XML'
