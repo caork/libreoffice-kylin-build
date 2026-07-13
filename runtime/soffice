@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+lo_root=/opt/libreoffice-headless
+program_dir=$lo_root/lib/libreoffice/program
+
+export FONTCONFIG_FILE=$lo_root/etc/fonts/fonts.conf
+export FONTCONFIG_PATH=$lo_root/etc/fonts
+export URE_BOOTSTRAP=vnd.sun.star.pathname:$program_dir/fundamentalrc
+export SAL_USE_VCLPLUGIN=${SAL_USE_VCLPLUGIN:-svp}
+
+exec "$program_dir/soffice.bin" "$@"

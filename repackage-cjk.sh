@@ -10,9 +10,10 @@ original_rpm=$1
 font_dir=$2
 output_dir=$3
 version=24.2.5.2
-release=2
+release=3
 package_name=libreoffice-headless
 font_target='opt/libreoffice-headless/lib/libreoffice/share/fonts/truetype'
+runtime_root='opt/libreoffice-headless'
 font_files=(
   NotoSansCJKsc-Regular.otf
   NotoSansCJKsc-Bold.otf
@@ -53,10 +54,23 @@ inject_fonts() {
 
 inject_fonts "$rpm_root"
 
-find "$rpm_root" -mindepth 1 -printf '/%P\n' | sort > "$top_dir/SOURCES/files.list"
+install -d "$rpm_root/$runtime_root/etc/fonts" "$rpm_root/$runtime_root/bin" \
+  "$rpm_root/usr/local/bin"
+install -m 0644 /usr/local/share/libreoffice-cjk/fonts.conf \
+  "$rpm_root/$runtime_root/etc/fonts/fonts.conf"
+rm -f "$rpm_root/$runtime_root/bin/soffice"
+install -m 0755 /usr/local/share/libreoffice-cjk/soffice \
+  "$rpm_root/$runtime_root/bin/soffice"
+ln -sfn /opt/libreoffice-headless/bin/soffice "$rpm_root/usr/local/bin/soffice"
+ln -sfn /opt/libreoffice-headless/bin/soffice "$rpm_root/usr/local/bin/libreoffice"
+
+rm -rf "$rpm_root/usr/lib/.build-id"
+printf '%s\n' /opt/libreoffice-headless /usr/local/bin/libreoffice \
+  /usr/local/bin/soffice > "$top_dir/SOURCES/files.list"
 cp -a "$rpm_root/." "$top_dir/SOURCES/payload"
 
 cat > "$top_dir/SPECS/${package_name}.spec" <<SPEC
+%global _build_id_links none
 Name:           ${package_name}
 Version:        ${version}
 Release:        ${release}%{?dist}
@@ -81,7 +95,7 @@ cp -a %{_sourcedir}/payload/. %{buildroot}/
 
 %changelog
 * Mon Jul 13 2026 caork - ${version}-${release}
-- Bundle Noto CJK fallback fonts for Chinese document conversion.
+- Bundle Noto CJK fallback fonts and a self-contained headless launcher.
 SPEC
 
 rpmbuild --define "_topdir $top_dir" --target aarch64 -bb "$top_dir/SPECS/${package_name}.spec"
