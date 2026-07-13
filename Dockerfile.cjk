@@ -5,8 +5,24 @@ FROM debian:bookworm-slim AS fonts
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      fonts-noto-cjk && \
+      ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
+
+RUN install -d /fonts && \
+    curl -fL --retry 10 --retry-delay 3 \
+      -o /fonts/NotoSansCJKsc-Regular.otf \
+      https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf && \
+    curl -fL --retry 10 --retry-delay 3 \
+      -o /fonts/NotoSansCJKsc-Bold.otf \
+      https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf && \
+    curl -fL --retry 10 --retry-delay 3 \
+      -o /fonts/NotoSerifCJKsc-Regular.otf \
+      https://raw.githubusercontent.com/notofonts/noto-cjk/main/Serif/OTF/SimplifiedChinese/NotoSerifCJKsc-Regular.otf && \
+    curl -fL --retry 10 --retry-delay 3 \
+      -o /fonts/NotoSerifCJKsc-Bold.otf \
+      https://raw.githubusercontent.com/notofonts/noto-cjk/main/Serif/OTF/SimplifiedChinese/NotoSerifCJKsc-Bold.otf && \
+    printf '%s\n' 'Noto CJK fonts are licensed under SIL Open Font License 1.1.' \
+      > /fonts/Noto-CJK-LICENSE
 
 FROM debian:bookworm-slim AS packager
 
@@ -15,11 +31,7 @@ RUN apt-get update && \
       cpio rpm tar gzip && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc /fonts/
-COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc /fonts/
-COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc /fonts/
-COPY --from=fonts /usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc /fonts/
-COPY --from=fonts /usr/share/doc/fonts-noto-cjk/copyright /fonts/Noto-CJK-LICENSE
+COPY --from=fonts /fonts/ /fonts/
 
 COPY repackage-cjk.sh cjk-font-aliases.xml /usr/local/share/libreoffice-cjk/
 COPY libreoffice-24.2.5.2-headless-aarch64.tar.gz /input/
